@@ -3,7 +3,7 @@ let axios = require("axios");
 // let fetch = require("node-fetch");
 
 // ********************   willcome to my backend code  ***********************
-function willcome(req, res) {
+function wellcome(req, res) {
   res.status(200).send("Willcome to my code");
 }
 
@@ -14,7 +14,7 @@ let getToken = async (req, res, next) => {
     password: "rNd59AI!",
     returnSecureToken: true,
   });
-  
+
   // console.log("🚀 ~ file: orderController.js ~ line 15 ~ getToken ~ data", data)
 
   let config = {
@@ -58,7 +58,7 @@ async function createOrder(req, res) {
 }
 
 module.exports = {
-  willcome,
+  wellcome,
   createOrder,
   getToken,
 };

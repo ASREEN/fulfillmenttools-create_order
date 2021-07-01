@@ -1,4 +1,5 @@
 let axios = require("axios");
+const { response } = require("express");
 // const { json, response } = require("express");
 // let fetch = require("node-fetch");
 
@@ -31,34 +32,84 @@ let getToken = async (req, res, next) => {
   next();
 };
 
-// *************************  create order from pickjob ******************************
+// *************************  create order from pickjob req.body from postman ******************************
 async function createOrder(req, res) {
   let postData = req.body;
   console.log({ postData });
   let token = req.token.idToken;
 
   try {
-    const resData = await axios.create({
-      baseURL: process.env.CREATE_ORDER_API,
-      headers: {
-        post: {
+    axios
+      .post(process.env.CREATE_ORDER_API, postData, {
+        headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-      },
-      data: postData,
-    });
-
-    console.log("line 51  ~ post_axios", resData);
-    res.status(200).json(resData.defaults.data);
+      })
+      .then((response2) => {
+        console.log(response2);
+        res.status(201).json(response2);
+      })
+      .catch((err) => console.log({ err }));
   } catch (error) {
     console.log({ error });
     res.status(500).json({ message: "Something went wrong." });
   }
 }
 
+// *************************  pickLineItems as a post Method from create Order ******************************
+async function createOrder2(req, res) {
+  let postData =  {"pickLineItems": [
+    {
+      "article": {
+        "tenantArticleId": "4711",
+        "title": "Cologne Water",
+        "imageUrl": "string",
+        "customAttributes": {},
+        "attributes": [
+          {
+            "category": "descriptive",
+            "priority": 100,
+            "key": "%%subtitle%%",
+            "value": "585er Gold"
+          }
+        ]
+      },
+      "quantity": 21,
+      "scannableCodes": [
+        "string"
+      ],
+      "customAttributes": {},
+      "id": "climk4dcQFiPdA5ULuhS",
+      "picked": 20,
+      "status": "OPEN"
+    }
+  ]
+}
+  // console.log({ postData });
+  let token = req.token.idToken;
+
+  try {
+    axios
+      .post(process.env.CREATE_ORDER_API2, postData, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response2) => {
+        console.log(response2);
+        res.status(201).json(response2);
+      })
+      .catch((err) => console.log({ err }));
+  } catch (error) {
+    console.log({ error });
+    res.status(500).json({ message: "Something went wrong." });
+  }
+}
 module.exports = {
   wellcome,
   createOrder,
+  createOrder2,
   getToken,
 };

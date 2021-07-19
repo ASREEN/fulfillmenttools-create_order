@@ -1,7 +1,7 @@
-const express = require("express");
-const dotenv = require("dotenv");
-const corsConfig = require("./middlewares/corsConfig");
-const indexRoutes = require("./routes/rootRouter");
+import express  from "express";
+import dotenv  from "dotenv";
+import corsConfig  from "./middlewares/corsConfig.js";
+import indexRoutes  from "./routes/rootRouter.js";
 dotenv.config();
 const PORT = process.env.PORT || 5500;
 // init express

@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Fulfillment ",
   "main": "server.js",
+  "type": "module",
   "scripts": {
     "test": "test",
     "start": "nodemon server.js"

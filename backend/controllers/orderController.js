@@ -7,8 +7,8 @@ function wellcome(req, res) {
 // ************  middleware to create token for Authorization  ***************
 let getToken = async (req, res, next) => {
   let data = JSON.stringify({
-    email: "asreen@ocff-redtiger-git.com",
-    password: "rNd59AI!",
+    email:process.env.EMAIL,
+    password: process.env.PASSWORD,
     returnSecureToken: true,
   });
 
@@ -34,33 +34,7 @@ async function createPickJob(req, res) {
     postData
   });
   let token = req.token.idToken;
-  console.log({
-    tokenAA: token
-  })
-
   try {
-    // fetch(process.env.CREATE_ORDER_API_PICKJOBS, postData, {
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //       Authorization: `Bearer ${token}`
-    //     }
-    //   })
-    //   .then(response => {
-    //     response.json()
-    //     console.log({
-    //       line51_response: response
-    //     })
-    //     // res.status(201).json(response);
-    //   })
-    //   .then(created_pickjob => {
-    //     console.log({
-    //       created_pickjob
-    //     })
-    //     res.status(201).json(created_pickjob);
-    //   })
-    //   .catch((err) => console.log({
-    //     err
-    //   }));
     axios
       .post(process.env.CREATE_ORDER_API_PICKJOBS, postData, {
         headers: {
@@ -233,10 +207,6 @@ function perfectPick(req, res) {
   }
 
   try {
-    console.log("???????????????????????????????????")
-    console.log({
-      dataBody
-    })
     axios
       .patch(process.env.UPDATE_PICKJOB_STATUS + pickjob_id, dataBody, {
         headers: {
@@ -248,7 +218,7 @@ function perfectPick(req, res) {
         console.log({
           data: response.data
         });
-        res.status(201).json("perfect job");
+        res.status(201).json({message:"perfect job", response_result: response.data});
       })
       .catch((err) => console.log({
         message: "This pickjob already closed",

@@ -1,4 +1,6 @@
 import axios from "axios";
+//const mainUrl = process.env.MAIN_API;
+
 // ********************   willcome to my backend code  ***********************
 function wellcome(req, res) {
   res.status(200).send("Willcome to my code");
@@ -7,7 +9,7 @@ function wellcome(req, res) {
 // ************  middleware to create token for Authorization  ***************
 let getToken = async (req, res, next) => {
   let data = JSON.stringify({
-    email:process.env.EMAIL,
+    email: process.env.EMAIL,
     password: process.env.PASSWORD,
     returnSecureToken: true,
   });
@@ -27,7 +29,8 @@ let getToken = async (req, res, next) => {
   next();
 };
 
-// *************************  create order from pickjob req.body from postman ******************************
+// *************************  create pickjob from req.body from postman ******************************
+// *************************        localhost:5500/api/pickjob  ******************************************
 async function createPickJob(req, res) {
   let postData = req.body;
   console.log({
@@ -35,22 +38,16 @@ async function createPickJob(req, res) {
   });
   let token = req.token.idToken;
   try {
-    axios
-      .post(process.env.CREATE_ORDER_API_PICKJOBS, postData, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        }
-      })
-      .then((response) => {
-        console.log({
-          res_line50: response.data
-        });
-        res.status(201).json(response.data);
-      })
-      .catch((err) => console.log({
-        err
-      }));
+    const response = await axios.post(process.env.MAIN_API + "/pickjobs", postData, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      }
+    })
+    if (response.status == 201) {
+      console.log(response.data)
+      res.status(201).json(response.data);
+    }
   } catch (error) {
     console.log({
       error
@@ -61,26 +58,21 @@ async function createPickJob(req, res) {
   }
 }
 
-// *************************  pickLineItems as a post Method from create Order ******************************
+// *************************  create pickjob from req.body from postman ******************************
+// *************************        localhost:5500/api/orders  ******************************************
 async function createOrder(req, res) {
   let token = req.token.idToken;
   try {
-    axios
-      .post(process.env.CREATE_ORDER_API, req.body, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((response) => {
-        console.log({
-          response
-        });
-        res.status(201).json(response.data);
-      })
-      .catch((err) => console.log({
-        err
-      }));
+    const response = await axios.post(`${process.env.MAIN_API}/orders`, req.body, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      }
+    })
+    if (response.status == 201) {
+      console.log(response.data)
+      res.status(201).json(response.data);
+    }
   } catch (error) {
     console.log({
       catchError: error
@@ -93,27 +85,20 @@ async function createOrder(req, res) {
 
 // ************************** PERECT PICK ****************************
 // 1) GET THE PICKJOB WITH ID AND CHECK AND SEND THE DATA FOR THE NEXT MIDDLEWARE .
-function getPickjob(req, res, next) {
+async function getPickjob(req, res, next) {
   let token = req.token.idToken;
   let pickjobId = req.params.id;
   try {
-    axios
-      .get(process.env.GET_PICKJOB_ID + pickjobId, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((response) => {
-        console.log({
-          data: response.data
-        });
-        req.data = response.data;
-        next()
-      })
-      .catch((err) => console.log({
-        err
-      }));
+    const response = await axios.get(`${process.env.MAIN_API}/pickjobs/${pickjobId}`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      }
+    })
+    if (response) {
+      req.data = response.data;
+      next()
+    }
   } catch (error) {
     console.log({
       catchError: error
@@ -125,17 +110,11 @@ function getPickjob(req, res, next) {
 }
 
 //2) UPDATE STATUS FOR PICKJOB WITH THE ID INTO INPROGRESS. 
-function updateStatus(req, res, next) {
+async function updateStatus(req, res, next) {
   let token = req.token.idToken;
   let pickjobData = req.data;
-  console.log({
-    data_from_next: pickjobData
-  })
   let pickLineItems = pickjobData.pickLineItems; // get the array of pickline items
-  let pickjob_id = pickjobData.orderRef; // or let pickjob_id = pickjobData.id get the id for this pickjob
-  console.log({
-    pickjob_id
-  })
+  let pickjob_id = pickjobData.id; //  get the id for this pickjob
   let pickLineItem = []; // Array to save an object for each pickline item contains id and quantiny. 
   for (let i = 0; i < pickLineItems.length; i++) {
     let item = {
@@ -145,7 +124,7 @@ function updateStatus(req, res, next) {
     pickLineItem.push(item)
   }
   req.pickjob_id = pickjob_id
-  req.pickLineItemsIdQuantity = pickLineItem; // array od ids and quantities
+  req.pickLineItemsIdQuantity = pickLineItem; // array of ids and quantities
   let bodyData = {
     "version": 1,
     "actions": [{
@@ -154,26 +133,21 @@ function updateStatus(req, res, next) {
     }]
   }
   try {
-    let url = process.env.UPDATE_PICKJOB_STATUS + pickjob_id;
-    console.log({
-      url
-    })
-    axios
+    let url = `${process.env.MAIN_API}/pickjobs/${pickjob_id}`;
+    const response = await axios
       .patch(url, bodyData, {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+          Authorization: `Bearer ${token}`
+        }
       })
-      .then((response) => {
-        console.log({
-          response
-        });
-        next()
-      })
-      .catch((err) => console.log({
-        err
-      }));
+
+    if (response) {
+      console.log({
+        response
+      });
+      next()
+    }
   } catch (error) {
     console.log({
       catchError: error
@@ -185,7 +159,7 @@ function updateStatus(req, res, next) {
 }
 
 //3) PATCH call to close the Pickjob and perfect pick all the lines.
-function perfectPick(req, res) {
+async function perfectPick(req, res) {
   let token = req.token.idToken;
   let pickjob_id = req.pickjob_id;
   let pickLineItemsIdQuantity = req.pickLineItemsIdQuantity;
@@ -207,23 +181,22 @@ function perfectPick(req, res) {
   }
 
   try {
-    axios
-      .patch(process.env.UPDATE_PICKJOB_STATUS + pickjob_id, dataBody, {
+    const response = await axios
+      .patch(`${process.env.MAIN_API}/pickjobs/${pickjob_id}`, dataBody, {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+          Authorization: `Bearer ${token}`
+        }
       })
-      .then((response) => {
-        console.log({
-          data: response.data
-        });
-        res.status(201).json({message:"perfect job", response_result: response.data});
-      })
-      .catch((err) => console.log({
-        message: "This pickjob already closed",
-        err
-      }));
+    if (response) {
+      console.log({
+        data: response.data
+      });
+      res.status(201).json({
+        message: "perfect job",
+        response_result: response.data
+      });
+    }
   } catch (error) {
     console.log({
       catchError: error

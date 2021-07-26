@@ -58,7 +58,7 @@ async function createPickJob(req, res) {
   }
 }
 
-// *************************  create pickjob from req.body from postman ******************************
+// *************************  create order from req.body from postman ******************************
 // *************************        localhost:5500/api/orders  ******************************************
 async function createOrder(req, res) {
   let token = req.token.idToken;
